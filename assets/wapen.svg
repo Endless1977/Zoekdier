@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" role="img" aria-label="Wapen Endless">
+  <defs>
+    <clipPath id="schild"><path d="M10 8h100v58c0 34-24 56-50 66C34 122 10 100 10 66z"/></clipPath>
+    <linearGradient id="lucht" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f3b73"/><stop offset="1" stop-color="#2f5aa8"/></linearGradient>
+  </defs>
+  <g clip-path="url(#schild)">
+    <rect width="120" height="150" fill="url(#lucht)"/>
+    <g fill="#f4c542">
+      <path id="s" d="M0-6l1.8 4.2 4.5.4-3.4 3 1 4.4L0 3.6-3.9 6l1-4.4-3.4-3 4.5-.4z"/>
+      <use href="#s" x="26" y="22"/><use href="#s" x="43" y="16"/><use href="#s" x="60" y="13"/><use href="#s" x="77" y="16"/><use href="#s" x="94" y="22"/>
+    </g>
+    <g transform="translate(0 0)">
+      <path d="M44 84c-8-2-12-10-6-16 4-4 12-3 18 2 2-12-2-22 6-28 6-4 12 0 11 6-1 4-6 4-7 9-1 8 4 16 0 26-4 8-14 4-22 1z" fill="#fff" stroke="#c9d3e6" stroke-width="1"/>
+      <path d="M73 46l9 3-9 2z" fill="#f08a24"/>
+      <circle cx="70" cy="46" r="1.3" fill="#111"/>
+    </g>
+    <g fill="none" stroke="#9ec9ff" stroke-width="3">
+      <path d="M0 96q10-6 20 0t20 0 20 0 20 0 20 0 20 0"/>
+      <path d="M0 106q10-6 20 0t20 0 20 0 20 0 20 0 20 0"/>
+      <path d="M0 116q10-6 20 0t20 0 20 0 20 0 20 0 20 0"/>
+    </g>
+  </g>
+  <path d="M10 8h100v58c0 34-24 56-50 66C34 122 10 100 10 66z" fill="none" stroke="#f4c542" stroke-width="4"/>
+  <text x="60" y="147" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="13" fill="#f4c542" letter-spacing="2">ENDLESS</text>
+</svg>
