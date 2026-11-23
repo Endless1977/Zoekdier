@@ -1,1 +1,50 @@
-{}
+{
+"alteveer": [
+53.1113,
+6.4339
+],
+"amersfoort": [
+52.1736,
+5.3847
+],
+"baarle-nassau": [
+51.439,
+4.8931
+],
+"breda": [
+51.5851,
+4.7614
+],
+"dubai": null,
+"geldrop": [
+51.4313,
+5.5876
+],
+"geleen": [
+51.0049,
+5.8282
+],
+"griekenland": null,
+"haarlem": [
+52.3834,
+4.6475
+],
+"mariakerke": null,
+"rotterdam": [
+51.931,
+4.2769
+],
+"sittard": [
+51.0049,
+5.8282
+],
+"steenbergen": [
+51.5999,
+4.3236
+],
+"tessenderlo": null,
+"valkenswaard": [
+51.3238,
+5.4492
+]
+}
