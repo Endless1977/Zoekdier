@@ -1,17 +1,25 @@
 {
- "gegenereerd": "2026-11-23T12:38:10+00:00",
+ "gegenereerd": "2026-11-23T14:02:38+00:00",
  "bronnen": [
   {
    "bron": "Verhuisdieren.nl",
-   "aantal": 17,
-   "nieuw_detail": 17,
+   "aantal": 314,
+   "nieuw_detail": 350,
+   "nog_te_doen": 5506,
    "ok": true
   },
   {
    "bron": "Ik zoek baas (Dierenbescherming)",
+   "aantal": 377,
+   "nieuw_detail": 500,
+   "nog_te_doen": 328,
+   "ok": true
+  },
+  {
+   "bron": "Marktplaats (API)",
    "aantal": 0,
-   "links": 0,
-   "ok": false
+   "ok": false,
+   "fout": "Geen API-sleutels (MP_CLIENT_ID/MP_CLIENT_SECRET)"
   }
  ]
 }

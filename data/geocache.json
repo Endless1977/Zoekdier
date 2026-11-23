@@ -1,4 +1,36 @@
 {
+"'s-gravenhage": [
+52.0721,
+4.293
+],
+"'t harde": [
+52.3987,
+5.8771
+],
+"alblasserdam": [
+51.8647,
+4.6657
+],
+"alkmaar": [
+52.6018,
+4.8033
+],
+"almelo": [
+52.3479,
+6.6582
+],
+"almere": [
+52.4025,
+5.2057
+],
+"almkerk": [
+51.7711,
+4.9698
+],
+"alphen aan den rijn": [
+52.1133,
+4.641
+],
 "alteveer": [
 53.1113,
 6.4339
@@ -7,15 +39,206 @@
 52.1736,
 5.3847
 ],
+"amstelveen": [
+52.2893,
+4.8515
+],
+"amstenrade": [
+50.9421,
+5.9265
+],
+"amsterdam": [
+52.3665,
+4.9198
+],
+"annerveenschekanaal": [
+53.076,
+6.7964
+],
+"apeldoorn": [
+52.1899,
+5.9219
+],
+"arcen": [
+51.4869,
+6.1928
+],
+"arnhem": [
+52.0011,
+5.8926
+],
+"athene": [
+51.8344,
+4.9654
+],
 "baarle-nassau": [
 51.439,
 4.8931
 ],
+"baarn": [
+52.2038,
+5.2641
+],
+"bahrain": null,
+"beerta": [
+53.1658,
+7.1097
+],
+"beilen": [
+52.8615,
+6.498
+],
+"beinsdorp": [
+52.2878,
+4.5997
+],
+"bennekom": [
+52.0074,
+5.6697
+],
+"bergen op zoom": [
+51.5035,
+4.2883
+],
+"berghem": [
+51.7684,
+5.575
+],
+"beuningen gld": [
+51.8562,
+5.7652
+],
+"biddinghuizen": [
+52.4392,
+5.6849
+],
+"borgercompagnie": [
+53.1087,
+6.8221
+],
+"born": [
+51.0388,
+5.8174
+],
+"bovenkarspel": [
+52.6995,
+5.2471
+],
+"braine-l’alleud": null,
+"brasov": null,
 "breda": [
 51.5851,
 4.7614
 ],
+"brunssum": [
+50.9429,
+5.978
+],
+"brussel": [
+51.9548,
+6.2655
+],
+"bussum": [
+52.2711,
+5.1645
+],
+"capelle aan den ijssel": [
+51.9349,
+4.5801
+],
+"cyprus": [
+52.0532,
+4.5339
+],
+"delft": [
+51.9985,
+4.3631
+],
+"den bosch": [
+51.7168,
+5.3519
+],
+"den ham": [
+52.4627,
+6.5032
+],
+"den helder": [
+52.94,
+4.7852
+],
+"didam": [
+51.9444,
+6.1378
+],
+"dinxperlo": [
+51.8651,
+6.4862
+],
+"doetinchem": [
+51.9608,
+6.2867
+],
+"doorwerth": [
+51.974,
+5.7864
+],
+"dordrecht": [
+51.7815,
+4.7089
+],
+"drachten": [
+53.1066,
+6.0934
+],
+"drempt": [
+52.0195,
+6.1863
+],
+"driebergen-rijsenburg": [
+52.0499,
+5.2862
+],
 "dubai": null,
+"ede": [
+52.0764,
+5.728
+],
+"eemdijk": [
+52.2621,
+5.3339
+],
+"eindhoven": [
+51.4502,
+5.4585
+],
+"ekeren - antwerpen": [
+51.9542,
+6.2648
+],
+"ellewoutsdijk": [
+51.3829,
+3.8181
+],
+"emmen": [
+52.7497,
+6.962
+],
+"enkhuizen": [
+52.7552,
+5.3034
+],
+"enschede": [
+52.2208,
+6.8778
+],
+"epe": [
+52.3255,
+5.955
+],
+"ermelo": [
+52.2882,
+5.6662
+],
 "geldrop": [
 51.4313,
 5.5876
@@ -24,27 +247,472 @@
 51.0049,
 5.8282
 ],
+"gent": [
+51.2568,
+3.8042
+],
+"geulle": [
+50.9231,
+5.7468
+],
+"gouda": [
+52.0153,
+4.7062
+],
 "griekenland": null,
+"grimbergen": [
+51.5753,
+4.3139
+],
+"groeningen": [
+51.6119,
+5.9966
+],
+"groningen": [
+53.2186,
+6.6206
+],
 "haarlem": [
 52.3834,
 4.6475
 ],
+"hamont": null,
+"harderwijk": [
+52.3413,
+5.6442
+],
+"hardinxveld-giessendam": [
+51.8326,
+4.8524
+],
+"heemstede": [
+52.3448,
+4.6154
+],
+"heerenveen": [
+52.996,
+5.978
+],
+"hellevoetsluis": [
+51.8396,
+4.1255
+],
+"hierden": [
+52.3564,
+5.6765
+],
+"hilversum": [
+52.2231,
+5.168
+],
+"hoboken": null,
+"hoensbroek": [
+50.9189,
+5.9253
+],
+"hoevelaken": [
+52.1784,
+5.46
+],
+"hollandsche rading": [
+52.177,
+5.1723
+],
+"hoofddorp": [
+52.3053,
+4.6848
+],
+"hoogeveen": [
+52.7231,
+6.5136
+],
+"hoogezand": [
+53.1437,
+6.7666
+],
+"hulst": [
+51.3332,
+4.065
+],
+"hurdegaryp": [
+53.2146,
+5.9522
+],
+"ijmuiden": [
+52.4555,
+4.5778
+],
+"ijsselstein": [
+52.0277,
+5.0288
+],
+"kampen": [
+52.5584,
+5.9233
+],
+"kapelle": [
+51.495,
+3.9705
+],
+"klarenbeek": [
+52.1711,
+6.0326
+],
+"kloosterburen": [
+53.4017,
+6.3981
+],
+"klundert": [
+51.6678,
+4.5338
+],
+"koewacht": [
+51.2389,
+3.956
+],
+"kortenberg": [
+51.7726,
+5.6456
+],
+"krommenie": [
+52.5069,
+4.7615
+],
+"lanaken": null,
+"leeuwarden": [
+53.17,
+5.7979
+],
+"leimuiden": [
+52.2187,
+4.6901
+],
+"liessel": [
+51.4142,
+5.836
+],
+"lisse": [
+52.2556,
+4.5458
+],
+"loosdrecht": [
+52.2005,
+5.0851
+],
+"maarssen": [
+52.1408,
+5.0444
+],
+"maastricht": [
+50.853,
+5.6995
+],
+"malden": [
+51.7914,
+5.8573
+],
+"manama": null,
+"mandamados": null,
+"mandamados/lesbos": null,
 "mariakerke": null,
+"martos, spanje": null,
+"meppel": [
+52.7159,
+6.1938
+],
+"middelharnis": [
+51.7595,
+4.1977
+],
+"middelie": [
+52.5387,
+5.0185
+],
+"mijas": null,
+"millingen aan de rijn": [
+51.8622,
+6.0288
+],
+"moira": null,
+"moira lesbos": null,
+"nijkerk": [
+52.2121,
+5.4844
+],
+"nijmegen": [
+51.8385,
+5.8368
+],
+"noordwijk": [
+52.2711,
+4.4762
+],
+"nuenen": [
+51.4786,
+5.5495
+],
+"numansdorp": [
+51.7274,
+4.4548
+],
+"oldenzaal": [
+52.3077,
+6.911
+],
+"onesti": null,
+"oosterhout": [
+51.6378,
+4.8641
+],
+"oosterwolde": [
+53.0019,
+6.3055
+],
+"oss": [
+51.7816,
+5.5264
+],
+"oud-beijerland": [
+51.8097,
+4.4134
+],
+"oud-vossemeer": [
+51.5791,
+4.1839
+],
+"oude wetering": [
+52.2109,
+4.6423
+],
+"overasselt": [
+51.7721,
+5.797
+],
+"paal": [
+52.3465,
+5.2201
+],
+"pannerden": [
+51.8945,
+6.0342
+],
+"pesse": [
+52.7721,
+6.4595
+],
+"purmerend": [
+52.5436,
+4.9307
+],
+"raard": [
+53.3276,
+5.9383
+],
+"ridderkerk": [
+51.8688,
+4.5961
+],
+"roemenië": null,
+"roosendaal": [
+51.5132,
+4.4245
+],
 "rotterdam": [
 51.931,
 4.2769
+],
+"scherpenheuvel zichem": [
+51.3661,
+3.5969
+],
+"schiedam": [
+51.9268,
+4.3853
+],
+"sharjah": null,
+"simonshaven": [
+51.8263,
+4.2879
+],
+"sint agatha": [
+51.7088,
+5.9044
+],
+"sint pancras": [
+52.6624,
+4.7861
+],
+"sint-katelijne-waver": [
+51.6571,
+5.3781
+],
+"sint-lambrechts-woluwe": [
+51.8319,
+4.9953
+],
+"sint-pauwels": [
+51.6571,
+5.3781
 ],
 "sittard": [
 51.0049,
 5.8282
 ],
+"skopje": null,
+"sliedrecht": [
+51.8307,
+4.7729
+],
+"soest": [
+52.1562,
+5.2963
+],
+"spanje": null,
+"spata": null,
+"spijkenisse": [
+51.8427,
+4.343
+],
 "steenbergen": [
 51.5999,
 4.3236
 ],
+"strumica": null,
+"ten boer": [
+53.273,
+6.6949
+],
 "tessenderlo": null,
+"tessenderlo - ham": [
+52.4627,
+6.5032
+],
+"thesinge": [
+53.2741,
+6.6529
+],
+"tholen": [
+51.5704,
+4.1064
+],
+"tiel": [
+51.8851,
+5.4069
+],
+"tienen": null,
+"tienhoven": [
+52.1585,
+5.0863
+],
+"tilburg": [
+51.5834,
+5.0774
+],
+"turkije": null,
+"uithoorn": [
+52.2369,
+4.7908
+],
+"utrecht": [
+52.0911,
+5.0748
+],
 "valkenswaard": [
 51.3238,
 5.4492
+],
+"veendam": [
+53.089,
+6.8801
+],
+"veenendaal": [
+52.0237,
+5.5557
+],
+"veghel": [
+51.6085,
+5.5445
+],
+"veles": null,
+"vlaardingen": [
+51.9174,
+4.3279
+],
+"vleuten": [
+52.102,
+5.0083
+],
+"vlijmen": [
+51.6899,
+5.2098
+],
+"vlissingen": [
+51.4653,
+3.481
+],
+"wanroij": [
+51.6518,
+5.8236
+],
+"weesp": [
+52.3032,
+5.058
+],
+"wernhout": [
+51.442,
+4.6385
+],
+"wetsens": [
+53.3475,
+6.036
+],
+"wijk aan zee": [
+52.4916,
+4.6023
+],
+"wilnis": [
+52.1847,
+4.8968
+],
+"witharen": [
+52.5626,
+6.3812
+],
+"woerden": [
+52.1069,
+4.8989
+],
+"zakynthos": null,
+"zaltbommel": [
+51.7923,
+5.1584
+],
+"zandvoort": [
+52.36,
+4.5357
+],
+"zeewolde": [
+52.3444,
+5.4552
+],
+"zeist": [
+52.102,
+5.2552
+],
+"zutphen": [
+52.1363,
+6.234
+],
+"zwaanshoek": [
+52.3154,
+4.6226
+],
+"zwijndrecht": [
+51.8218,
+4.6058
+],
+"zwolle": [
+52.5187,
+6.1184
 ]
 }
