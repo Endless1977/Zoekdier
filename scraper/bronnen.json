@@ -1,29 +1,15 @@
 {
-  "_uitleg": "Generieke bronnen. lijst_urls mag {pagina} bevatten. link_patroon is een regex op de volledige URL van een dierpagina. aanbieder_type: asiel | herplaatsing | kennel | cattery | kwekerij | particulier | handelaar (leeg = automatisch). Zet actief op false om een bron over te slaan.",
+  "_uitleg": "Generieke bronnen. lijst_urls mag {pagina} bevatten. link_patroon is een regex op de volledige URL van een dierpagina. aanbieder_type: asiel | herplaatsing | kennel | cattery | kwekerij | particulier | handelaar (leeg = automatisch). Zet actief op false om een bron over te slaan. Verhuisdieren, Ik zoek baas en Marktplaats hebben een eigen adapter en staan hier niet.",
   "bronnen": [
-    {
-      "sleutel": "ikzb",
-      "naam": "Ik zoek baas (Dierenbescherming)",
-      "actief": true,
-      "aanbieder_type": "asiel",
-      "lijst_urls": [
-        "https://www.ikzoekbaas.nl/honden",
-        "https://www.ikzoekbaas.nl/katten",
-        "https://www.ikzoekbaas.nl/konijnen",
-        "https://www.ikzoekbaas.nl/vogels",
-        "https://www.ikzoekbaas.nl/overige-dieren"
-      ],
-      "link_patroon": "ikzoekbaas\\.nl/(honden|katten|konijnen|vogels|overige-dieren|dier|dieren)/[a-z0-9-]+-?\\d+",
-      "max_detail": 400,
-      "opmerking": "URL-structuur nog niet bevestigd; zie data/bronstatus.json na de eerste run."
-    },
     {
       "sleutel": "rvb",
       "naam": "Raad van Beheer – pups met stamboom",
       "actief": false,
       "aanbieder_type": "kennel",
       "soort": "hond",
-      "lijst_urls": ["https://www.houdenvanhonden.nl/"],
+      "lijst_urls": [
+        "https://www.houdenvanhonden.nl/"
+      ],
       "link_patroon": "houdenvanhonden\\.nl/.+/nest",
       "max_detail": 200,
       "opmerking": "Vul de juiste URL van de pupvinder/nestenlijst in en zet actief op true."

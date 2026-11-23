@@ -16,7 +16,9 @@ Zoekprogramma voor honden, katten, vogels en overige dieren. Het haalt herplaats
 ```
 GitHub Action (elke 6 uur)  →  scraper/run.py  →  data/dieren.json  →  index.html (GitHub Pages)
 ```
-- `scraper/adapters/verhuisdieren.py`: uitlezer voor Verhuisdieren.nl (adoptiedieren; oppasdieren worden overgeslagen)
+- `scraper/adapters/verhuisdieren.py`: Verhuisdieren.nl via hun sitemap (adoptiedieren; oppasdieren worden overgeslagen)
+- `scraper/adapters/ikzoekbaas.py`: Ik zoek baas van de Dierenbescherming (alle aangesloten asielen) via de sitemap
+- `scraper/adapters/marktplaats_api.py`: Marktplaats via de **officiële API**, alleen met API-sleutels (zie hieronder)
 - `scraper/adapters/generiek.py` + `scraper/bronnen.json`: asielen, kennels en catteries toevoegen **zonder code**. Je geeft per bron de overzichts-URL's en een regex voor dierpagina's op.
 - `scraper/scoring.py`: betrouwbaarheid, broodfokkersignalen en het type aanbieder
 - `data/bronstatus.json`: per bron hoeveel dieren de laatste run opleverde (te zien onder ℹ️ Bronnen in de app)
@@ -33,9 +35,16 @@ Vanaf 25 signaalpunten, of bij een handelaar, krijgt de advertentie het label **
 2. **Settings → Actions → General → Workflow permissions:** *Read and write*
 3. **Actions → Dieren ophalen → Run workflow.** De eerste run duurt ongeveer 10 minuten. Daarna gaat het elke 6 uur vanzelf.
 
+### Marktplaats koppelen (optioneel)
+1. Vraag bij Marktplaats API-toegang aan, voor een *client_credentials*-client. Je krijgt dan een client ID en een client secret.
+2. Zet ze in de repo bij **Settings → Secrets and variables → Actions** als `MP_CLIENT_ID` en `MP_CLIENT_SECRET`.
+3. Start de workflow opnieuw. De scraper zoekt zelf de categorieën onder *Dieren en Toebehoren* en slaat toebehoren, oppas en "gezocht" over.
+
+Zonder sleutels slaat de scraper Marktplaats over. Bij Marktplaats-advertenties werkt de broodfokkercontrole per verkoper (op verkopers-ID): een verkoper met 3 of meer rassen krijgt het label.
+
 Lokaal draaien: `pip install -r requirements.txt && python scraper/run.py`, en dan `python -m http.server` in de repomap.
 
 ## Beperkingen
 - **Gegadigden:** de meeste sites tonen dit niet. Dan staat er "onbekend", en met een vinkje kies je of die dieren meetellen in het filter.
-- **Marktplaats** wordt niet uitgelezen, want hun voorwaarden verbieden dat. De app opent wel je zoekopdracht daar.
+- **Marktplaats:** de API-documentatie beschrijft niet alle velden. Het veld voor de plaats en de links naar de foto's heb ik zo goed mogelijk afgeleid. De eerste run met sleutels laat zien of dat klopt.
 - Een site die zijn opbouw verandert, levert 0 dieren op in de bronstatus. Pas dan het patroon aan in `bronnen.json` of in de adapter.

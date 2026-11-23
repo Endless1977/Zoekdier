@@ -131,14 +131,21 @@ def beoordeel(dier, verkoper_stats=None):
     return dier
 
 
+def _verkoper_sleutel(d):
+    a = d.get("aanbieder") or {}
+    if a.get("id"):
+        return f"{d.get('bron')}:{a['id']}"
+    return (a.get("naam") or "").strip().lower() or None
+
+
 def beoordeel_alles(dieren):
     """Twee rondes: eerst statistiek per aanbieder en prijs per ras, dan scoren."""
     per_verkoper = defaultdict(lambda: {"rassen": set(), "advertenties": 0})
     prijzen = defaultdict(list)
     for d in dieren:
-        naam = (d.get("aanbieder") or {}).get("naam")
+        naam = _verkoper_sleutel(d)
         if naam and d["aanbieder"].get("type") not in ("asiel", "herplaatsing"):
-            v = per_verkoper[naam.strip().lower()]
+            v = per_verkoper[naam]
             v["advertenties"] += 1
             if d.get("ras"):
                 v["rassen"].add(d["ras"].lower())
@@ -151,7 +158,7 @@ def beoordeel_alles(dieren):
         if len(lijst) >= 4 and d.get("prijs"):
             mediaan = lijst[len(lijst) // 2]
             d["prijs_laag"] = d["prijs"] < 0.4 * mediaan
-        naam = ((d.get("aanbieder") or {}).get("naam") or "").strip().lower()
+        naam = _verkoper_sleutel(d)
         stats = None
         if naam in per_verkoper:
             v = per_verkoper[naam]

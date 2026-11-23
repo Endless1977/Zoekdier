@@ -1,6 +1,7 @@
 """Adapter voor Verhuisdieren.nl (stichting, herplaatsing van honden, katten en konijnen).
 
-Overzicht:  https://verhuisdieren.nl/alle-dieren/?type=adopt&page=N  (24 per pagina)
+Alle profielen: https://verhuisdieren.nl/sitemap.xml (met lastmod). De overzichtspagina's
+negeren ?page=N buiten een browser, dus die gebruiken we alleen voor de status 'Gereserveerd'.
 Detail:     https://verhuisdieren.nl/plaatsprofiel/{id}-adoptie{hond|kat|konijn}-zoekt-baasje-{ras}-{plaats}/
 Oppasdieren (gastgezin/logeren) worden overgeslagen: die zijn niet te adopteren.
 Contactgegevens zijn op de site alleen zichtbaar voor ondersteuners (eenmalig €25).
@@ -11,7 +12,7 @@ from common import haal, kort, label_waarden, lees_gegadigden, lees_prijs, meta
 
 BASIS = "https://verhuisdieren.nl"
 NAAM = "Verhuisdieren.nl"
-SLUG_RE = re.compile(r"/plaatsprofiel/(\d+)-(adoptie|verhuis|oppas)(hond|kat|konijn)[a-z]*-zoekt-[a-z]+-(.+?)/?$")
+SLUG_RE = re.compile(r"/plaatsprofiel/(\d+)-(adoptie|verhuis|oppas)([a-z]+?)-zoekt-[a-z]+-(.+?)/?$")
 LABELS = ["Ras", "Leeftijd", "Woonplaats", "Geslacht", "Formaat", "Vacht", "Gecastreerd", "Oorsprong",
           "Adoptiekosten", "Vergoeding", "Adoptiebedrag", "Reden herplaatsing", "Laatste update"]
 SOORT = {"hond": "hond", "kat": "kat", "konijn": "overig"}
@@ -31,7 +32,7 @@ def _uit_slug(href, plaats):
         pslug = re.sub(r"[^a-z0-9]+", "-", plaats.lower()).strip("-")
         if ras.endswith(pslug):
             ras = ras[: -len(pslug)].rstrip("-")
-    return pid, soort_type, SOORT[dier], _slug_naar_tekst(ras)
+    return pid, soort_type, SOORT.get(dier, "overig"), _slug_naar_tekst(ras)
 
 
 def _foto_uit(el):
@@ -44,7 +45,36 @@ def _foto_uit(el):
     return m.group(1) if m else None
 
 
-def lijst(max_paginas=120):
+def sitemap(max_dagen=180):
+    """Alle adoptieprofielen uit de sitemap, nieuwste eerst, niet ouder dan max_dagen."""
+    import datetime as dt
+    soup = haal(f"{BASIS}/sitemap.xml", timeout=60)
+    if not soup:
+        return []
+    grens = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=max_dagen)
+    uit = []
+    for u in soup.find_all("url"):
+        loc = u.find("loc").get_text(strip=True) if u.find("loc") else ""
+        lm = u.find("lastmod").get_text(strip=True) if u.find("lastmod") else ""
+        info = _uit_slug(loc.rstrip("/"), None)
+        if not info or info[1] == "oppas":
+            continue
+        try:
+            t = dt.datetime.fromisoformat(lm)
+        except ValueError:
+            continue
+        if t < grens:
+            continue
+        pid, _, soort, ras = info
+        uit.append({"id": f"vhd-{pid}", "url": loc, "soort": soort, "ras": ras, "lastmod": lm, "_t": t})
+    uit.sort(key=lambda d: d["_t"], reverse=True)
+    for d in uit:
+        d.pop("_t")
+    print(f"  verhuisdieren sitemap: {len(uit)} adoptieprofielen van de laatste {max_dagen} dagen")
+    return uit
+
+
+def lijst(max_paginas=1):
     """Leest overzichtspagina's. Levert dicts met basisgegevens per dier."""
     gezien = set()
     for p in range(1, max_paginas + 1):
@@ -95,6 +125,12 @@ def detail(basis):
     if re.search(r"niet meer beschikbaar", tekst, re.I):
         return None
     v = label_waarden(soup, LABELS)
+    h1 = soup.find("h1")
+    naam = h1.get_text(" ", strip=True) if h1 else basis.get("naam")
+    blok = h1.find_parent() if h1 else None
+    blok = blok.find_parent() if blok and blok.find_parent() else blok
+    kop = blok.get_text(" ")[:1500] if blok else ""
+    gereserveerd = basis.get("status") == "gereserveerd" or bool(re.search(r"\bgereserveerd\b", kop, re.I))
     fotos = []
     for img in soup.find_all("img"):
         u = img.get("data-src") or img.get("src") or ""
@@ -108,6 +144,8 @@ def detail(basis):
     beschrijving = meta(soup, "og:description") or meta(soup, "description")
     return {
         **basis,
+        "naam": naam or "Onbekend",
+        "status": "gereserveerd" if gereserveerd else "beschikbaar",
         "ras": v.get("Ras") or basis.get("ras"),
         "leeftijd": v.get("Leeftijd"),
         "geslacht": v.get("Geslacht"),

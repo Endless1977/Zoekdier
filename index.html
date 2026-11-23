@@ -207,10 +207,10 @@ const TYPES = {
   kwekerij:"Kwekerij", particulier:"Particulier", handelaar:"Handelaar", onbekend:"Onbekend"
 };
 const EXTERN = {
-  hond:[["Verhuisdieren – honden","https://verhuisdieren.nl/honden/adoptiehonden/"],["Ik zoek baas (asielen)","https://www.ikzoekbaas.nl/"],["Raad van Beheer – pups met stamboom","https://www.houdenvanhonden.nl/"],["Marktplaats","https://www.marktplaats.nl/q/{q}/"]],
-  kat:[["Verhuisdieren – katten","https://verhuisdieren.nl/katten/adoptiekatten/"],["Ik zoek baas (asielen)","https://www.ikzoekbaas.nl/"],["Marktplaats","https://www.marktplaats.nl/q/{q}/"]],
-  vogel:[["Ik zoek baas (asielen)","https://www.ikzoekbaas.nl/"],["Marktplaats – vogels","https://www.marktplaats.nl/q/{q}/"]],
-  overig:[["Verhuisdieren – alle dieren","https://verhuisdieren.nl/alle-dieren/?type=adopt"],["Ik zoek baas (asielen)","https://www.ikzoekbaas.nl/"],["Marktplaats","https://www.marktplaats.nl/q/{q}/"]]
+  hond:[["Verhuisdieren – honden","https://verhuisdieren.nl/honden/adoptiehonden/"],["Ik zoek baas – asielhonden","https://ikzoekbaas.dierenbescherming.nl/zoek-asieldieren/honden"],["Raad van Beheer – pups met stamboom","https://www.houdenvanhonden.nl/"],["Marktplaats","https://www.marktplaats.nl/q/{q}/"]],
+  kat:[["Verhuisdieren – katten","https://verhuisdieren.nl/katten/adoptiekatten/"],["Ik zoek baas – asielkatten","https://ikzoekbaas.dierenbescherming.nl/zoek-asieldieren/katten"],["Marktplaats","https://www.marktplaats.nl/q/{q}/"]],
+  vogel:[["Ik zoek baas – vogels","https://ikzoekbaas.dierenbescherming.nl/zoek-asieldieren/vogels"],["Marktplaats – vogels","https://www.marktplaats.nl/q/{q}/"]],
+  overig:[["Verhuisdieren – alle dieren","https://verhuisdieren.nl/alle-dieren/?type=adopt"],["Ik zoek baas – konijnen en knagers","https://ikzoekbaas.dierenbescherming.nl/zoek-asieldieren/konijnen-en-knagers"],["Ik zoek baas – overige","https://ikzoekbaas.dierenbescherming.nl/zoek-asieldieren/overige"],["Marktplaats","https://www.marktplaats.nl/q/{q}/"]]
 };
 const ZOEKWOORD = {hond:"pup", kat:"kitten", vogel:"vogel", overig:"konijn"};
 
@@ -373,7 +373,7 @@ function toon(){
   }
   const q = encodeURIComponent(((S.ras || "") + " " + ZOEKWOORD[S.tab]).trim());
   $("#extern").innerHTML = `<h3>Ook zelf zoeken bij</h3>` + EXTERN[S.tab].map(([t,u]) => `<a href="${esc(u.replace("{q}", q))}" target="_blank" rel="noopener">${esc(t)} ↗</a>`).join("") +
-    `<div class="klein">Marktplaats wordt niet automatisch uitgelezen (niet toegestaan volgens hun voorwaarden); deze link opent je zoekopdracht daar.</div>`;
+    (DIEREN.some(d => d.bron === "Marktplaats (API)") ? "" : `<div class="klein">Marktplaats wordt via de officiële API opgehaald zodra de API-sleutels zijn ingesteld; tot die tijd opent deze link je zoekopdracht daar.</div>`);
 }
 
 // ---------- detailvenster ----------
