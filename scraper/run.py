@@ -19,6 +19,7 @@ import generiek  # noqa: E402
 import ikzoekbaas  # noqa: E402
 import marktplaats_api  # noqa: E402
 from rassen import vul_rassen_aan  # noqa: E402
+from kenmerken import SCHEMA, extraheer  # noqa: E402
 import verhuisdieren  # noqa: E402
 from common import bewaar_geocache, geocodeer  # noqa: E402
 from scoring import beoordeel_alles  # noqa: E402
@@ -55,7 +56,7 @@ def run_sitemap_bron(mod, vorige, status, max_dagen, max_detail, statussen=None)
         if basis["id"] in statussen:
             basis["status"] = statussen[basis["id"]]
         oud = vorige.get(basis["id"])
-        if oud and oud.get("lastmod") == basis["lastmod"]:
+        if oud and oud.get("lastmod") == basis["lastmod"] and oud.get("schema", 1) >= SCHEMA:
             if basis.get("status"):
                 oud["status"] = basis["status"]
             uit.append(oud)
@@ -130,6 +131,8 @@ def main():
         dieren += [d for d in vorige.values() if d.get("bron") == marktplaats_api.NAAM]
 
     vul_rassen_aan(dieren)
+    for d in dieren:
+        extraheer(d, d.pop("_tekst", ""))
 
     for d in dieren:
         if d.get("plaats") and not d.get("coord"):

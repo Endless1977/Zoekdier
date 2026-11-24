@@ -7,7 +7,7 @@ Op de overzichtspagina's worden de kaartjes met JavaScript geladen, de detailpag
 import datetime as dt
 import re
 
-from common import haal, kort, label_waarden, meta
+from common import alle_kenmerken, haal, hoofdtekst, kort, label_waarden, meta
 
 BASIS = "https://ikzoekbaas.dierenbescherming.nl"
 NAAM = "Ik zoek baas (Dierenbescherming)"
@@ -67,6 +67,23 @@ def leeftijd_uit(geboortedatum):
     return f"{dagen // 365} jaar"
 
 
+def _uniek_grootste(fotos):
+    """cms-URL's bevatten '_330x285_crop...' per formaat; per bestandsnaam alleen het grootste houden."""
+    beste = {}
+    for u in fotos:
+        naam = re.sub(r"\?.*$", "", u).rsplit("/", 1)[-1]
+        m = re.search(r"/_(\d+)x(\d+)_", u)
+        opp = int(m.group(1)) * int(m.group(2)) if m else 10**9
+        if naam not in beste or opp > beste[naam][0]:
+            beste[naam] = (opp, u)
+    volgorde = []
+    for u in fotos:
+        naam = re.sub(r"\?.*$", "", u).rsplit("/", 1)[-1]
+        if beste[naam][1] not in volgorde:
+            volgorde.append(beste[naam][1])
+    return volgorde
+
+
 def detail(basis):
     soup = haal(basis["url"])
     if not soup:
@@ -95,6 +112,7 @@ def detail(basis):
         u = img.get("data-src") or img.get("src") or ""
         if "cms.dierenbescherming.nl/assets" in u and u not in fotos and not re.search(r"logo|icon|header|banner", u, re.I):
             fotos.append(u)
+    fotos = _uniek_grootste(fotos)
     prijs_tekst = v.get("Adoptieprijs") or v.get("Adoptiekosten") or "Zie tarieven van het asiel"
     beschrijving = meta(soup, "og:description") or meta(soup, "description")
     extra = "; ".join(f"{k}: {v[k]}" for k in ("Kan bij kinderen", "Kan bij honden", "Kan bij katten") if v.get(k))
@@ -114,6 +132,8 @@ def detail(basis):
         "status": "gereserveerd" if "gereserveerd" in beschikbaar else "beschikbaar",
         "gegadigden": None,
         "beschrijving": kort(" ".join(x for x in (beschrijving, extra) if x)),
+        "kenmerken": alle_kenmerken(soup),
+        "_tekst": hoofdtekst(soup, basis["url"]),
         "aanbieder": {"naam": asiel or "Asiel (Dierenbescherming)", "type": "asiel"},
         "bron": NAAM,
     }

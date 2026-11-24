@@ -97,6 +97,22 @@ dialog::backdrop{background:rgba(30,25,15,.55)}
 .sluit{position:absolute;top:10px;right:12px;z-index:3;background:#fff;border:none;border-radius:50%;width:34px;height:34px;font-size:1.2rem;cursor:pointer}
 .groot{display:inline-block;background:var(--groen);color:#fff;text-decoration:none;padding:10px 16px;border-radius:10px;font-weight:600;margin-top:8px}
 .filterknop{display:none}
+.profielen{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 0 0}
+.profielen .titel{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--zacht);margin-right:4px}
+.pknop{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--blauw);background:#fff;color:var(--blauw);border-radius:12px;padding:8px 12px;cursor:pointer;font-weight:600}
+.pknop.actief{background:var(--blauw);color:#fff}
+.pknop .n{font-size:.75rem;font-weight:700;background:var(--groen2);color:var(--groen);border-radius:20px;padding:1px 7px}
+.pknop .nieuw{background:var(--oranje);color:#fff}
+.pknop .bewerk{opacity:.6;font-weight:400}
+.pknop.toevoegen{border-style:dashed;border-color:var(--rand);color:var(--zacht)}
+.chip .x{cursor:pointer;margin-left:2px;color:var(--rood);font-weight:700}
+.chip small{color:var(--zacht)}
+.form h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--zacht);margin:14px 0 6px}
+.form input[type=text],.form input[type=number],.form select{width:100%;padding:8px 10px;border:1px solid var(--rand);border-radius:9px;background:#fff}
+.form .knoppen{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.form .knop.hoofd{background:var(--groen);color:#fff;border-color:var(--groen);font-weight:600}
+.form .knop.gevaar{color:var(--rood);margin-left:auto}
+.gez{font-size:.75rem}
 @media (max-width:820px){
   main{grid-template-columns:1fr;padding:0 10px 30px}
   aside{position:fixed;inset:0 auto 0 0;width:88vw;max-height:none;height:100vh;z-index:40;border-radius:0;transform:translateX(-100%);transition:.25s}
@@ -105,6 +121,9 @@ dialog::backdrop{background:rgba(30,25,15,.55)}
   .dlg{grid-template-columns:1fr}
   header h1{font-size:1.25rem} header .sub{display:none} header .lbl{display:none} header{gap:8px;padding:8px 10px} header img{height:38px}
   .tabs{top:54px;padding:8px 10px 0}
+  .profielen{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
+  .profielen .titel{display:none}
+  .pknop{flex:none;white-space:nowrap}
 }
 </style>
 </head>
@@ -128,7 +147,24 @@ dialog::backdrop{background:rgba(30,25,15,.55)}
     <input type="text" id="fZoek" placeholder="Naam, ras of woord…">
 
     <h3>Ras</h3>
-    <select id="fRas"><option value="">Alle rassen</option></select>
+    <select id="fRas"><option value="">+ ras toevoegen…</option></select>
+    <div class="chips" id="rasChips" style="margin-top:6px"></div>
+
+    <h3>Kleur</h3>
+    <div class="chips" id="fKleur"></div>
+
+    <h3>Vacht</h3>
+    <div class="chips" id="fVacht"></div>
+    <label class="chip" style="margin-top:6px"><input type="checkbox" id="fKenmOnbekend"> ook als kleur/vacht onbekend</label>
+
+    <h3>Gezondheid</h3>
+    <select id="fGezond">
+      <option value="">Maakt niet uit</option>
+      <option value="geenmed">Geen medicatie nodig</option>
+      <option value="geenprob">Geen gezondheidsproblemen bekend</option>
+      <option value="gezond">Aantoonbaar gezond</option>
+    </select>
+    <label class="chip" style="margin-top:6px"><input type="checkbox" id="fGezOnbekend" checked> ook als onbekend</label>
 
     <h3>Afstand</h3>
     <div class="rij">
@@ -173,10 +209,12 @@ dialog::backdrop{background:rgba(30,25,15,.55)}
       <span class="wissel"></span>
     </div>
 
-    <button class="knop" id="wis" style="margin-top:14px;width:100%">Filters wissen</button>
+    <button class="knop" id="bewaarProfiel" style="margin-top:14px;width:100%">💾 Bewaar als zoekprofiel</button>
+    <button class="knop" id="wis" style="margin-top:8px;width:100%">Filters wissen</button>
   </aside>
 
   <section>
+    <div class="profielen" id="profielen"></div>
     <div class="balk">
       <span class="klein" id="telling"></span>
       <select id="sorteer" class="knop">
@@ -195,6 +233,7 @@ dialog::backdrop{background:rgba(30,25,15,.55)}
 
 <dialog id="dlg"></dialog>
 <dialog id="bronDlg"></dialog>
+<dialog id="profielDlg"></dialog>
 
 <script>
 "use strict";
@@ -222,10 +261,22 @@ const opslag = {
 
 let DIEREN = [], BRONSTATUS = null;
 let favorieten = new Set(opslag.get("fav", []));
-const S = Object.assign({
-  tab:"hond", zoek:"", ras:"", locatie:"", coord:null, afstand:305, status:"", gegMax:"", gegOnbekend:true,
+const STANDAARD = {
+  tab:"hond", zoek:"", rassen:[], kleuren:[], vacht:[], kenmOnbekend:false, gezond:"", gezOnbekend:true,
+  locatie:"", coord:null, afstand:305, status:"", gegMax:"", gegOnbekend:true,
   prijsMin:"", prijsMax:"", types:[], minScore:0, foto:false, geenBrood:false, sorteer:"score", alleenFav:false
-}, opslag.get("filters", {}));
+};
+// velden die een zoekprofiel vastlegt
+const PROFIEL_VELDEN = ["tab","zoek","rassen","kleuren","vacht","kenmOnbekend","gezond","gezOnbekend","locatie","coord","afstand",
+  "status","gegMax","gegOnbekend","prijsMin","prijsMax","types","minScore","foto","geenBrood"];
+const KLEUR_OPTIES = ["zwart","wit","bruin","rood","crème/blond","grijs/blauw","zilver","cypers","lapjes/schildpad","driekleur","gestroomd","merle","gevlekt","point"];
+const VACHT_OPTIES = ["kort","halflang","lang","ruw/draadhaar","krullend","haarloos","weinig verharen"];
+const kopie = o => JSON.parse(JSON.stringify(o));
+const S = Object.assign(kopie(STANDAARD), opslag.get("filters", {}));
+window.S_ACTUEEL = S;
+if(S.ras){ S.rassen = [S.ras]; delete S.ras; }   // oude opslag
+let profielen = opslag.get("profielen", []);
+let actiefProfiel = null;
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -267,11 +318,28 @@ function bouwTabs(){
   const tel = {}; DIEREN.forEach(d => tel[d.soort] = (tel[d.soort]||0)+1);
   $("#tabs").innerHTML = SOORTEN.map(s => `<button class="tab ${S.tab===s.k?"actief":""}" data-tab="${s.k}">${s.e} ${s.t}<span class="tel">${tel[s.k]||0}</span></button>`).join("");
 }
+function rassenVan(soort){
+  const tel = {};
+  DIEREN.forEach(d => { if(d.soort===soort && d.ras && !/^onbekend$/i.test(d.ras.trim())) { const r = d.ras.trim(); tel[r] = (tel[r]||0)+1; } });
+  return Object.entries(tel).sort((a,b) => a[0].localeCompare(b[0], "nl"));
+}
 function bouwRassen(){
-  const rassen = [...new Set(DIEREN.filter(d => d.soort===S.tab && d.ras).map(d => d.ras.trim()))]
-    .sort((a,b) => a.localeCompare(b, "nl"));
-  if(S.ras && !rassen.includes(S.ras)) S.ras = "";
-  $("#fRas").innerHTML = `<option value="">Alle rassen (${rassen.length})</option>` + rassen.map(r => `<option ${r===S.ras?"selected":""}>${esc(r)}</option>`).join("");
+  const rassen = rassenVan(S.tab);
+  $("#fRas").innerHTML = `<option value="">+ ras toevoegen… (${rassen.length})</option>` +
+    rassen.filter(([r]) => !S.rassen.includes(r)).map(([r,n]) => `<option value="${esc(r)}">${esc(r)} (${n})</option>`).join("");
+  $("#rasChips").innerHTML = S.rassen.length
+    ? S.rassen.map((r,i) => `<span class="chip aan">${esc(r)} <span class="x" data-weg="${i}" title="Verwijderen">×</span></span>`).join("")
+    : `<span class="klein">Alle rassen</span>`;
+  bouwKenmerkChips();
+}
+function telKenmerk(veld){
+  const tel = {}; DIEREN.forEach(d => { if(d.soort===S.tab) (d[veld]||[]).forEach(k => tel[k] = (tel[k]||0)+1); }); return tel;
+}
+function bouwKenmerkChips(){
+  const k = telKenmerk("kleuren"), v = telKenmerk("vacht");
+  const chip = (lijst, waarde, n, attr) => `<label class="chip ${lijst.includes(waarde)?"aan":""}"><input type="checkbox" data-${attr}="${esc(waarde)}" ${lijst.includes(waarde)?"checked":""}> ${esc(waarde)} <small>${n||0}</small></label>`;
+  $("#fKleur").innerHTML = KLEUR_OPTIES.filter(x => k[x] || S.kleuren.includes(x)).map(x => chip(S.kleuren, x, k[x], "kleur")).join("") || `<span class="klein">Nog geen kleurinformatie</span>`;
+  $("#fVacht").innerHTML = VACHT_OPTIES.filter(x => v[x] || S.vacht.includes(x)).map(x => chip(S.vacht, x, v[x], "vacht")).join("") || `<span class="klein">Nog geen vachtinformatie</span>`;
 }
 function bouwTypes(){
   $("#fType").innerHTML = Object.entries(TYPES).filter(([k]) => k!=="onbekend").map(([k,t]) =>
@@ -283,6 +351,9 @@ function bouwUI(){
   $("#fGegadigden").value = S.gegMax; $("#fGegOnbekend").checked = S.gegOnbekend;
   $("#fPrijsMin").value = S.prijsMin; $("#fPrijsMax").value = S.prijsMax;
   $("#fScore").value = S.minScore; $("#fFoto").checked = S.foto; $("#sorteer").value = S.sorteer;
+  $("#fGezond").value = S.gezond; $("#fGezOnbekend").checked = S.gezOnbekend; $("#fKenmOnbekend").checked = S.kenmOnbekend;
+  if(S.coord && S.locatie) $("#locInfo").textContent = "📍 " + S.locatie;
+  bouwProfielen();
   document.querySelectorAll('#fStatus input').forEach(i => { i.checked = i.value === S.status; i.parentElement.classList.toggle("aan", i.checked); });
   zetBrood(); tekstjes();
   favLabel();
@@ -297,20 +368,29 @@ function zetBrood(){
 }
 
 // ---------- filteren ----------
-function gefilterd(){
-  const q = S.zoek.trim().toLowerCase();
+function gefilterd(S = window.S_ACTUEEL){
+  const q = (S.zoek||"").trim().toLowerCase();
+  const rassen = (S.rassen||[]).map(r => r.toLowerCase());
   const gegMax = S.gegMax === "" ? null : +S.gegMax;
   const pMin = S.prijsMin === "" ? null : +S.prijsMin, pMax = S.prijsMax === "" ? null : +S.prijsMax;
   let lijst = DIEREN.filter(d => {
     if(d.soort !== S.tab) return false;
     if(S.alleenFav && !favorieten.has(d.id)) return false;
     if(q && !`${d.naam} ${d.ras} ${d.beschrijving} ${d.plaats} ${d.aanbieder?.naam}`.toLowerCase().includes(q)) return false;
-    if(S.ras && (d.ras||"").trim() !== S.ras) return false;
+    if(rassen.length && !rassen.some(r => (d.ras||"").toLowerCase().includes(r) || (d.naam||"").toLowerCase().includes(r))) return false;
+    if(S.kleuren?.length){ if(!(d.kleuren||[]).length){ if(!S.kenmOnbekend) return false; } else if(!S.kleuren.some(k => d.kleuren.includes(k))) return false; }
+    if(S.vacht?.length){ if(!(d.vacht||[]).length){ if(!S.kenmOnbekend) return false; } else if(!S.vacht.some(k => d.vacht.includes(k))) return false; }
+    if(S.gezond){
+      const g = d.gezondheid || "onbekend";
+      if(S.gezond === "geenmed"){ if(d.medicatie === true) return false; if(d.medicatie == null && !S.gezOnbekend) return false; }
+      else if(S.gezond === "geenprob"){ if(g === "aandacht") return false; if(g === "onbekend" && !S.gezOnbekend) return false; }
+      else if(S.gezond === "gezond"){ if(g !== "gezond") return false; }
+    }
     if(S.status && d.status !== S.status) return false;
     if(gegMax !== null){ if(d.gegadigden == null){ if(!S.gegOnbekend) return false; } else if(d.gegadigden > gegMax) return false; }
     if(pMin !== null && (d.prijs == null || d.prijs < pMin)) return false;
     if(pMax !== null && (d.prijs == null || d.prijs > pMax)) return false;
-    if(S.types.length && !S.types.includes(d.aanbieder?.type || "onbekend")) return false;
+    if(S.types?.length && !S.types.includes(d.aanbieder?.type || "onbekend")) return false;
     if((d.betrouwbaarheid?.score ?? 0) < S.minScore) return false;
     if(S.foto && !d.fotos.length) return false;
     if(S.geenBrood && d.broodfokker_verdacht) return false;
@@ -349,6 +429,7 @@ function kaart(d){
         <span class="badge ${type}">${TYPES[type] || type}</span>
         ${d.plaats ? `<span class="badge">📍 ${esc(d.plaats)}${d._km!=null ? " · " + Math.round(d._km) + " km" : ""}</span>` : ""}
         <span class="badge">👥 ${d.gegadigden!=null ? d.gegadigden + " gegadigden" : "gegadigden onbekend"}</span>
+        ${gezBadge(d)}
         ${d.broodfokker_verdacht ? `<span class="badge waarschuwing">⚠ broodfokker?</span>` : ""}
       </div>
       <div class="prijs">${prijs}</div>
@@ -358,6 +439,7 @@ function kaart(d){
 }
 function toon(){
   opslag.set("filters", {...S, coord:S.coord});
+  document.querySelectorAll(".pknop[data-pid]").forEach(b => b.classList.toggle("actief", b.dataset.pid === actiefProfiel));
   const lijst = gefilterd();
   const soort = SOORTEN.find(s => s.k===S.tab);
   $("#telling").textContent = `${lijst.length} ${soort.t.toLowerCase()} gevonden` + (S.geenBrood ? " · broodfokkers uitgesloten" : "");
@@ -371,7 +453,7 @@ function toon(){
     $("#raster").innerHTML = lijst.slice(0, getoond).map(kaart).join("") +
       (lijst.length > getoond ? `<div class="leeg" style="grid-column:1/-1"><button class="knop" id="meer">Toon meer (${lijst.length - getoond} over)</button></div>` : "");
   }
-  const q = encodeURIComponent(((S.ras || "") + " " + ZOEKWOORD[S.tab]).trim());
+  const q = encodeURIComponent(((S.rassen[0] || "") + " " + ZOEKWOORD[S.tab]).trim());
   $("#extern").innerHTML = `<h3>Ook zelf zoeken bij</h3>` + EXTERN[S.tab].map(([t,u]) => `<a href="${esc(u.replace("{q}", q))}" target="_blank" rel="noopener">${esc(t)} ↗</a>`).join("") +
     (DIEREN.some(d => d.bron === "Marktplaats (API)") ? "" : `<div class="klein">Marktplaats wordt via de officiële API opgehaald zodra de API-sleutels zijn ingesteld; tot die tijd opent deze link je zoekopdracht daar.</div>`);
 }
@@ -400,10 +482,14 @@ function openDetail(id){
         ${rij("Gegadigden", d.gegadigden != null ? d.gegadigden : "Onbekend (niet vermeld door bron)")}
         ${rij("Aanbieder", esc(d.aanbieder?.naam) + ` <span class="badge ${type}">${TYPES[type]||type}</span>`)}
         ${rij("Leeftijd", esc(d.leeftijd))}${rij("Geslacht", esc(d.geslacht))}${rij("Herkomst", esc(d.herkomst))}
+        ${rij("Kleur", esc((d.kleuren||[]).join(", ")))}${rij("Vacht", esc((d.vacht||[]).join(", ")))}
+        ${rij("Gezondheid", gezTekst(d))}
+        ${rij("Medicatie", d.medicatie === true ? "💊 Ja / waarschijnlijk" : d.medicatie === false ? "Nee" : "")}
         ${rij("Plaats", esc(d.plaats) + (d._km != null ? ` (${Math.round(d._km)} km)` : ""))}
         ${rij("Geplaatst", esc(d.geplaatst))}${rij("Bron", esc(d.bron))}
       </table>
       ${d.beschrijving ? `<p style="font-size:.92rem;line-height:1.45">${esc(d.beschrijving)}</p>` : ""}
+      ${Object.keys(d.kenmerken||{}).length ? `<details><summary class="klein" style="cursor:pointer">Alle kenmerken van de bron (${Object.keys(d.kenmerken).length})</summary><table>${Object.entries(d.kenmerken).map(([k,v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</table></details>` : ""}
       <h3 style="margin-bottom:4px">Betrouwbaarheid: <span style="color:${kleur(b.score)}">${b.score}/100</span></h3>
       <ul class="redenen">${b.redenen.map(r => `<li><span>${esc(r.tekst)}</span><span class="${r.punten<0?"min":"plus"}">${r.punten>0?"+":""}${r.punten}</span></li>`).join("")}</ul>
       ${d.broodfokker_signalen?.length ? `<div class="signaal"><b>⚠ Let op:</b><br>${d.broodfokker_signalen.map(esc).join("<br>")}</div>` : ""}
@@ -450,8 +536,140 @@ function wisselFav(id){
   document.querySelectorAll(`.ster[data-fav="${CSS.escape(id)}"]`).forEach(b => b.textContent = favorieten.has(id) ? "★" : "☆");
 }
 
+// ---------- gezondheid weergave ----------
+function gezBadge(d){
+  if(d.medicatie === true) return `<span class="badge gez" title="${esc((d.gezondheid_info||[]).join(", "))}" style="background:#fdf0dc;color:#8a5a12">💊 medicatie</span>`;
+  if(d.gezondheid === "aandacht") return `<span class="badge gez" title="${esc((d.gezondheid_info||[]).join(", "))}" style="background:#fdf0dc;color:#8a5a12">⚕ ${esc((d.gezondheid_info||[])[0] || "aandacht")}</span>`;
+  if(d.gezondheid === "gezond") return `<span class="badge gez asiel">❤ gezond</span>`;
+  return "";
+}
+function gezTekst(d){
+  const g = d.gezondheid || "onbekend";
+  if(g === "gezond") return "❤ Gezond (volgens de advertentie)";
+  if(g === "aandacht") return "⚕ Aandacht nodig: " + esc((d.gezondheid_info||[]).join(", "));
+  return "Onbekend (niet vermeld)";
+}
+
+// ---------- zoekprofielen ----------
+function bewaarProfielen(){ opslag.set("profielen", profielen); }
+function profielTreffers(p){ return gefilterd(Object.assign(kopie(STANDAARD), p)); }
+function bouwProfielen(){
+  const html = profielen.map(p => {
+    const lijst = profielTreffers(p), gezien = new Set(p.gezien || []);
+    const nieuw = p.gezien ? lijst.filter(d => !gezien.has(d.id)).length : 0;
+    const em = SOORTEN.find(s => s.k === p.tab)?.e || "🐾";
+    return `<button class="pknop ${actiefProfiel === p.id ? "actief" : ""}" data-pid="${esc(p.id)}" title="Klik om dit zoekprofiel te tonen">
+      ${em} ${esc(p.naam)} <span class="n">${lijst.length}</span>${nieuw ? `<span class="n nieuw">${nieuw} nieuw</span>` : ""}
+      <span class="bewerk" title="Bewerken">✎</span></button>`;
+  }).join("");
+  $("#profielen").innerHTML = `<span class="titel">Mijn zoekprofielen</span>${html}<button class="pknop toevoegen" id="nieuwProfiel">＋ Nieuw zoekprofiel</button>`;
+}
+function pasProfielToe(id){
+  const p = profielen.find(x => x.id === id); if(!p) return;
+  const sorteer = S.sorteer;
+  Object.assign(S, kopie(STANDAARD), kopie(p), {sorteer: p.coord && p.afstand < 305 ? "afstand" : sorteer});
+  delete S.id; delete S.naam; delete S.gezien;
+  actiefProfiel = id;
+  p.gezien = profielTreffers(p).map(d => d.id); bewaarProfielen();
+  getoond = MAX_TONEN; bouwUI(); toon();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function openProfiel(id, vanFilters){
+  const bestaand = profielen.find(x => x.id === id);
+  const p = bestaand ? kopie(bestaand) : Object.assign(kopie(STANDAARD), vanFilters ? Object.fromEntries(PROFIEL_VELDEN.map(k => [k, kopie(S[k] ?? STANDAARD[k])])) : {geenBrood:true}, {naam:""});
+  const dlg = $("#profielDlg");
+  const chips = (opties, gekozen, attr) => opties.map(o => `<label class="chip ${gekozen.includes(o)?"aan":""}"><input type="checkbox" data-${attr}="${esc(o)}" ${gekozen.includes(o)?"checked":""}> ${esc(o)}</label>`).join("");
+  const teken = () => {
+    dlg.innerHTML = `<button class="sluit" onclick="this.closest('dialog').close()">✕</button>
+    <div class="details form" style="max-height:88vh">
+      <h2>${bestaand ? "Zoekprofiel bewerken" : "Nieuw zoekprofiel"}</h2>
+      <p class="klein">Leg vast wat je zoekt. Daarna toont één klik op het profiel alle dieren die passen, met het aantal nieuwe sinds je laatste bezoek.</p>
+      <h3>Naam</h3><input type="text" id="pNaam" value="${esc(p.naam)}" placeholder="Bijv. Labrador dichtbij">
+      <h3>Diersoort</h3><select id="pTab">${SOORTEN.map(x => `<option value="${x.k}" ${x.k===p.tab?"selected":""}>${x.e} ${x.t}</option>`).join("")}</select>
+      <h3>Rassen</h3>
+      <div class="rij"><input type="text" id="pRasIn" list="pRasLijst" placeholder="Typ een ras…"><button class="knop" id="pRasPlus" style="flex:none">Toevoegen</button></div>
+      <datalist id="pRasLijst">${rassenVan(p.tab).map(([r]) => `<option value="${esc(r)}">`).join("")}</datalist>
+      <div class="chips" id="pRassen" style="margin-top:6px">${p.rassen.length ? p.rassen.map((r,i) => `<span class="chip aan">${esc(r)} <span class="x" data-weg="${i}">×</span></span>`).join("") : `<span class="klein">Alle rassen</span>`}</div>
+      <h3>Kleur</h3><div class="chips" id="pKleur">${chips(KLEUR_OPTIES, p.kleuren, "kleur")}</div>
+      <h3>Vacht</h3><div class="chips" id="pVacht">${chips(VACHT_OPTIES, p.vacht, "vacht")}</div>
+      <label class="chip" style="margin-top:6px"><input type="checkbox" id="pKenmOnb" ${p.kenmOnbekend?"checked":""}> ook dieren waarvan kleur/vacht onbekend is</label>
+      <h3>Gezondheid</h3>
+      <select id="pGezond">
+        <option value="" ${p.gezond===""?"selected":""}>Maakt niet uit</option>
+        <option value="geenmed" ${p.gezond==="geenmed"?"selected":""}>Geen medicatie nodig</option>
+        <option value="geenprob" ${p.gezond==="geenprob"?"selected":""}>Geen gezondheidsproblemen bekend</option>
+        <option value="gezond" ${p.gezond==="gezond"?"selected":""}>Aantoonbaar gezond</option>
+      </select>
+      <label class="chip" style="margin-top:6px"><input type="checkbox" id="pGezOnb" ${p.gezOnbekend?"checked":""}> ook als gezondheid onbekend is</label>
+      <h3>Zoekstraal</h3>
+      <input type="text" id="pLoc" value="${esc(p.locatie)}" placeholder="Postcode of plaats">
+      <input type="range" id="pAfstand" min="5" max="305" step="5" value="${p.afstand}">
+      <div class="klein">Straal: <b id="pAfstandTxt">${p.afstand >= 305 ? "onbeperkt" : p.afstand + " km"}</b></div>
+      <h3>Verder</h3>
+      <div class="rij"><input type="number" id="pPrijs" min="0" placeholder="Max. prijs (€)" value="${esc(p.prijsMax)}">
+        <input type="number" id="pScore" min="0" max="100" step="5" placeholder="Min. betrouwbaarheid" value="${p.minScore || ""}"></div>
+      <div class="chips" style="margin-top:8px">
+        <label class="chip"><input type="checkbox" id="pBeschikbaar" ${p.status==="beschikbaar"?"checked":""}> alleen beschikbaar</label>
+        <label class="chip"><input type="checkbox" id="pFoto" ${p.foto?"checked":""}> alleen met foto's</label>
+        <label class="chip"><input type="checkbox" id="pBrood" ${p.geenBrood?"checked":""}> 🚫 broodfokkers uitsluiten</label>
+      </div>
+      <div class="klein" id="pMelding" style="margin-top:10px"></div>
+      <div class="knoppen">
+        <button class="knop hoofd" id="pOpslaan">💾 Opslaan en tonen</button>
+        <button class="knop" onclick="this.closest('dialog').close()">Annuleren</button>
+        ${bestaand ? `<button class="knop gevaar" id="pVerwijder">Verwijderen</button>` : ""}
+      </div>
+    </div>`;
+  };
+  const lees = () => {
+    p.naam = $("#pNaam").value.trim(); p.tab = $("#pTab").value;
+    p.kenmOnbekend = $("#pKenmOnb").checked; p.gezond = $("#pGezond").value; p.gezOnbekend = $("#pGezOnb").checked;
+    p.afstand = +$("#pAfstand").value; p.prijsMax = $("#pPrijs").value; p.minScore = +$("#pScore").value || 0;
+    p.status = $("#pBeschikbaar").checked ? "beschikbaar" : ""; p.foto = $("#pFoto").checked; p.geenBrood = $("#pBrood").checked;
+    const loc = $("#pLoc").value.trim(); if(loc !== p.locatie){ p.locatie = loc; p.coord = null; }
+  };
+  teken();
+  dlg.onchange = e => {
+    const t = e.target;
+    if(t.id === "pTab"){ lees(); p.rassen = []; teken(); return; }
+    if(t.dataset.kleur){ p.kleuren = t.checked ? [...p.kleuren, t.dataset.kleur] : p.kleuren.filter(x => x !== t.dataset.kleur); t.parentElement.classList.toggle("aan", t.checked); }
+    if(t.dataset.vacht){ p.vacht = t.checked ? [...p.vacht, t.dataset.vacht] : p.vacht.filter(x => x !== t.dataset.vacht); t.parentElement.classList.toggle("aan", t.checked); }
+  };
+  dlg.oninput = e => { if(e.target.id === "pAfstand") $("#pAfstandTxt").textContent = +e.target.value >= 305 ? "onbeperkt" : e.target.value + " km"; };
+  dlg.onclick = async e => {
+    const t = e.target;
+    if(t === dlg) return dlg.close();
+    if(t.id === "pRasPlus"){ const r = $("#pRasIn").value.trim(); if(r && !p.rassen.includes(r)){ lees(); p.rassen.push(r); teken(); } return; }
+    if(t.dataset.weg != null){ lees(); p.rassen.splice(+t.dataset.weg, 1); teken(); return; }
+    if(t.id === "pVerwijder"){ profielen = profielen.filter(x => x.id !== bestaand.id); if(actiefProfiel === bestaand.id) actiefProfiel = null; bewaarProfielen(); bouwProfielen(); dlg.close(); return; }
+    if(t.id === "pOpslaan"){
+      lees();
+      if(!p.naam){ $("#pMelding").textContent = "Geef het profiel een naam."; $("#pNaam").focus(); return; }
+      if(p.locatie && !p.coord){
+        $("#pMelding").textContent = "Postcode opzoeken…";
+        try { p.coord = (await geocodeer(p.locatie)).coord; } catch { $("#pMelding").textContent = "Postcode/plaats niet gevonden."; return; }
+      }
+      if(!p.locatie) p.coord = null;
+      const opgeslagen = Object.fromEntries(PROFIEL_VELDEN.map(k => [k, p[k]]));
+      opgeslagen.naam = p.naam; opgeslagen.id = bestaand?.id || "p" + Date.now().toString(36);
+      opgeslagen.gezien = bestaand?.gezien;
+      profielen = bestaand ? profielen.map(x => x.id === bestaand.id ? opgeslagen : x) : [...profielen, opgeslagen];
+      bewaarProfielen(); dlg.close(); pasProfielToe(opgeslagen.id);
+    }
+  };
+  dlg.onkeydown = e => { if(e.key === "Enter" && e.target.id === "pRasIn"){ e.preventDefault(); $("#pRasPlus").click(); } };
+  dlg.showModal();
+}
+
 // ---------- locatie ----------
 let locTimer;
+async function geocodeer(q){
+  const url = "https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?rows=1&fl=centroide_ll,weergavenaam&fq=type:(postcode OR woonplaats OR adres)&q=" + encodeURIComponent(q);
+  const doc = (await (await fetch(url)).json()).response.docs[0];
+  const m = doc && /POINT\(([\d.]+) ([\d.]+)\)/.exec(doc.centroide_ll);
+  if(!m) throw new Error("niet gevonden");
+  return {coord:[+m[2], +m[1]], naam:doc.weergavenaam};
+}
 async function zoekLocatie(q){
   q = q.trim();
   if(!q){ S.coord = null; $("#locInfo").textContent = "Vul je postcode in om op afstand te filteren."; toon(); return; }
@@ -470,7 +688,21 @@ async function zoekLocatie(q){
 // ---------- events ----------
 $("#tabs").onclick = e => { const t = e.target.closest(".tab"); if(!t) return; S.tab = t.dataset.tab; getoond = MAX_TONEN; bouwTabs(); bouwRassen(); toon(); };
 $("#fZoek").oninput = e => { S.zoek = e.target.value; toon(); };
-$("#fRas").onchange = e => { S.ras = e.target.value; toon(); };
+$("#fRas").onchange = e => { if(e.target.value && !S.rassen.includes(e.target.value)) S.rassen.push(e.target.value); bouwRassen(); toon(); };
+$("#rasChips").onclick = e => { const i = e.target.dataset.weg; if(i == null) return; S.rassen.splice(+i, 1); bouwRassen(); toon(); };
+$("#fKleur").onchange = e => { const k = e.target.dataset.kleur; S.kleuren = e.target.checked ? [...S.kleuren, k] : S.kleuren.filter(x => x !== k); bouwKenmerkChips(); toon(); };
+$("#fVacht").onchange = e => { const k = e.target.dataset.vacht; S.vacht = e.target.checked ? [...S.vacht, k] : S.vacht.filter(x => x !== k); bouwKenmerkChips(); toon(); };
+$("#fKenmOnbekend").onchange = e => { S.kenmOnbekend = e.target.checked; toon(); };
+$("#fGezond").onchange = e => { S.gezond = e.target.value; toon(); };
+$("#fGezOnbekend").onchange = e => { S.gezOnbekend = e.target.checked; toon(); };
+$("#bewaarProfiel").onclick = () => openProfiel(null, true);
+$("#profielen").onclick = e => {
+  const b = e.target.closest("[data-pid]"), nieuw = e.target.closest("#nieuwProfiel");
+  if(nieuw) return openProfiel(null, false);
+  if(!b) return;
+  if(e.target.closest(".bewerk")) return openProfiel(b.dataset.pid);
+  pasProfielToe(b.dataset.pid);
+};
 $("#fLocatie").oninput = e => { S.locatie = e.target.value; clearTimeout(locTimer); locTimer = setTimeout(() => zoekLocatie(S.locatie), 600); };
 $("#mijnLocatie").onclick = () => {
   if(!navigator.geolocation){ $("#locInfo").textContent = "Locatie niet beschikbaar in deze browser."; return; }
@@ -491,7 +723,7 @@ const brood = () => { S.geenBrood = !S.geenBrood; zetBrood(); toon(); };
 $("#broodSchakel").onclick = brood;
 $("#broodSchakel").onkeydown = e => { if(e.key === " " || e.key === "Enter"){ e.preventDefault(); brood(); } };
 $("#sorteer").onchange = e => { S.sorteer = e.target.value; toon(); };
-$("#wis").onclick = () => { Object.assign(S, {zoek:"", ras:"", locatie:"", coord:null, afstand:305, status:"", gegMax:"", gegOnbekend:true, prijsMin:"", prijsMax:"", types:[], minScore:0, foto:false, geenBrood:false, alleenFav:false}); bouwUI(); toon(); };
+$("#wis").onclick = () => { const {tab, sorteer} = S; Object.assign(S, kopie(STANDAARD), {tab, sorteer}); actiefProfiel = null; $("#locInfo").textContent = "Vul je postcode in om op afstand te filteren."; bouwUI(); toon(); };
 $("#favKnop").onclick = () => { S.alleenFav = !S.alleenFav; favLabel(); toon(); };
 $("#bronKnop").onclick = toonBronnen;
 $("#openFilter").onclick = () => $("#filters").classList.add("open");

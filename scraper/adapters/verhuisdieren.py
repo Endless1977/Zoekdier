@@ -8,7 +8,7 @@ Contactgegevens zijn op de site alleen zichtbaar voor ondersteuners (eenmalig â‚
 """
 import re
 
-from common import haal, kort, label_waarden, lees_gegadigden, lees_prijs, meta
+from common import alle_kenmerken, haal, hoofdtekst, kort, label_waarden, lees_gegadigden, lees_prijs, meta
 
 BASIS = "https://verhuisdieren.nl"
 NAAM = "Verhuisdieren.nl"
@@ -156,6 +156,8 @@ def detail(basis):
         "fotos": fotos[:8],
         "gegadigden": lees_gegadigden(tekst),
         "beschrijving": kort(beschrijving),
+        "kenmerken": alle_kenmerken(soup),
+        "_tekst": hoofdtekst(soup, basis["url"]),
         "bijgewerkt": v.get("Laatste update"),
         "aanbieder": {"naam": "Particulier via Verhuisdieren", "type": "herplaatsing"},
         "bron": NAAM,

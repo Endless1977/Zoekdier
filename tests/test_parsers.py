@@ -90,3 +90,24 @@ assert d["naam"] == "Balou" and d["plaats"] == "Den Helder" and d["status"] == "
 ikzoekbaas.haal = lambda url, timeout=25: BeautifulSoup(html.replace("{status}", "Geplaatst"), "html.parser")
 assert ikzoekbaas.detail({"id": "ikzb-1", "url": "u", "soort": "hond", "lastmod": "x"}) is None
 print("ikzoekbaas tests ok")
+
+# ---- kenmerken ----
+from kenmerken import extraheer
+k = extraheer({"ras": "Europese korthaar", "naam": "Tijger", "kenmerken": {"Speciale zorg": "Nee"}},
+              "Tijger is een cypers katertje met witte sokjes. Hij is FIV negatief en kerngezond, heeft geen medicatie nodig.")
+print(k["kleuren"], k["vacht"], k["gezondheid"], k["medicatie"], k["gezondheid_info"])
+assert "cypers" in k["kleuren"] and k["vacht"][0] == "kort" and k["gezondheid"] == "gezond" and k["medicatie"] is False
+k = extraheer({"ras": "Maine Coon", "kenmerken": {"Kleur": "zwart-zilver"}}, "Lieve kat met diabetes, krijgt 2x per dag insuline. Lange vacht.")
+print(k["kleuren"], k["vacht"], k["gezondheid"], k["medicatie"], k["gezondheid_info"])
+assert k["kleuren"] == ["zwart", "zilver"] and "lang" in k["vacht"] and k["gezondheid"] == "aandacht" and k["medicatie"] and "diabetes" in k["gezondheid_info"]
+k = extraheer({"ras": "Mix"}, "Getest op leishmania en ehrlichia: negatief. Blonde reu met ruwhaar vacht.")
+print(k["kleuren"], k["vacht"], k["gezondheid"], k["medicatie"], k["gezondheid_info"])
+assert "bloedparasieten" not in k["gezondheid_info"] and "crème/blond" in k["kleuren"] and "ruw/draadhaar" in k["vacht"]
+k = extraheer({"ras": "Labrador", "beschrijving": "Pup"}, "")
+assert k["gezondheid"] == "onbekend" and k["medicatie"] is None and k["vacht"] == ["kort"] and k["schema"] == 1
+from common import lees_prijs
+assert lees_prijs("€400-€575") == 400 and lees_prijs("100-275 euro") == 100
+from ikzoekbaas import _uniek_grootste
+f = _uniek_grootste(["https://c/a/_330x285_crop/X.png?s=1", "https://c/a/_800x550_crop/X.png?s=1", "https://c/a/_519x453_crop/Y.jpg"])
+assert f == ["https://c/a/_800x550_crop/X.png?s=1", "https://c/a/_519x453_crop/Y.jpg"], f
+print("kenmerken tests ok")

@@ -172,6 +172,7 @@ def ophalen():
                     "status": "gereserveerd" if re.search(r"\bgereserveerd\b", titel, re.I) else "beschikbaar",
                     "gegadigden": None,
                     "beschrijving": kort(oms),
+                    "_tekst": f"{titel} {oms}",
                     "aanbieder": {"naam": seller.get("sellerName") or "Onbekend",
                                   "id": seller.get("sellerId"),
                                   "type": classificeer_aanbieder(f"{seller.get('sellerName', '')} {titel} {oms}", soort=soort)},

@@ -10,7 +10,7 @@ import json
 import re
 import urllib.parse
 
-from common import haal, herken_soort, kort, label_waarden, lees_gegadigden, lees_prijs, meta
+from common import alle_kenmerken, haal, herken_soort, hoofdtekst, kort, label_waarden, lees_gegadigden, lees_prijs, meta
 from scoring import classificeer_aanbieder
 
 LABELS = ["Naam", "Ras", "Soort", "Diersoort", "Leeftijd", "Geboortedatum", "Geslacht", "Locatie", "Plaats",
@@ -98,6 +98,8 @@ def detail(bron, url):
         "status": "gereserveerd" if re.search(r"gereserveerd", status_t, re.I) else "beschikbaar",
         "gegadigden": lees_gegadigden(tekst),
         "beschrijving": kort(beschrijving),
+        "kenmerken": alle_kenmerken(soup),
+        "_tekst": hoofdtekst(soup, url),
         "aanbieder": {"naam": aanbieder_naam, "type": atype},
         "bron": bron["naam"],
     }

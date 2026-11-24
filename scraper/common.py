@@ -56,6 +56,11 @@ def lees_prijs(tekst):
     t = tekst.lower()
     if "gratis" in t:
         return 0.0
+    bereik = re.search(r"€?\s*(\d[\d.]*)\s*(?:-|tot|t/m)\s*€?\s*(\d[\d.]*)", tekst)
+    if bereik:  # '€400-€575' of '100-275 euro': ondergrens (vanaf-prijs)
+        laag = bereik.group(1).replace(".", "")
+        if laag.isdigit():
+            return float(laag)
     m = re.search(r"€\s*([\d.]+)(?:,(\d{1,2}))?", tekst) or re.search(r"([\d.]+)(?:,(\d{1,2}))?\s*(euro|eur)\b", t)
     if not m:
         return None
@@ -135,3 +140,44 @@ def bewaar_geocache():
     os.makedirs(os.path.dirname(GEOCACHE_PAD), exist_ok=True)
     with open(GEOCACHE_PAD, "w", encoding="utf-8") as f:
         json.dump(_geocache, f, ensure_ascii=False, indent=0, sort_keys=True)
+
+
+def alle_kenmerken(soup, max_aantal=40):
+    """Alle korte label/waarde-paren van een pagina (tabelrijen, dt/dd, 'Label: waarde')."""
+    uit = {}
+
+    def zet(k, v):
+        k = re.sub(r"\s+", " ", k or "").strip(" :")
+        v = re.sub(r"\s+", " ", v or "").strip()
+        if 1 < len(k) <= 40 and 0 < len(v) <= 160 and k not in uit and not k.isdigit():
+            uit[k] = v
+
+    for tr in soup.find_all("tr"):
+        cellen = tr.find_all(["td", "th"])
+        if len(cellen) == 2:
+            zet(cellen[0].get_text(" "), cellen[1].get_text(" "))
+    for dt_ in soup.find_all("dt"):
+        dd = dt_.find_next_sibling("dd")
+        if dd:
+            zet(dt_.get_text(" "), dd.get_text(" "))
+    for el in soup.find_all(["li", "p", "span", "div"]):
+        if el.find(["li", "p", "div", "table"]):
+            continue
+        m = re.match(r"^\s*([A-Za-zÀ-ÿ/ ]{2,40}):\s*(.{1,160})$", el.get_text(" ").strip())
+        if m:
+            zet(m.group(1), m.group(2))
+        if len(uit) >= max_aantal:
+            break
+    return dict(list(uit.items())[:max_aantal])
+
+
+def hoofdtekst(soup, eigen_url=""):
+    """Paginatekst zonder menu/voet en zonder kaartjes van ándere dieren (die vervuilen kleur/gezondheid)."""
+    import copy
+    s = copy.copy(soup)
+    for el in s.find_all(["nav", "header", "footer", "script", "style", "noscript", "form"]):
+        el.decompose()
+    for a in s.find_all("a", href=True):
+        if re.search(r"/(plaatsprofiel|asieldier)/", a["href"]) and (not eigen_url or a["href"].rstrip("/") not in eigen_url):
+            a.decompose()
+    return re.sub(r"\s+", " ", s.get_text(" ")).strip()
