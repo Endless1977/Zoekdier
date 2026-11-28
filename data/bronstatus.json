@@ -1,17 +1,17 @@
 {
- "gegenereerd": "2026-11-27T16:55:09+00:00",
+ "gegenereerd": "2026-11-28T01:37:04+00:00",
  "bronnen": [
   {
    "bron": "Verhuisdieren.nl",
-   "aantal": 1550,
+   "aantal": 1762,
    "nieuw_detail": 350,
-   "nog_te_doen": 3789,
+   "nog_te_doen": 3430,
    "ok": true
   },
   {
    "bron": "Ik zoek baas (Dierenbescherming)",
-   "aantal": 744,
-   "nieuw_detail": 83,
+   "aantal": 739,
+   "nieuw_detail": 11,
    "nog_te_doen": 0,
    "ok": true
   },
